@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "next": "latest",
+    "patch-package": "^7.0.0",
     "react": "latest",
     "react-dom": "latest"
   },
