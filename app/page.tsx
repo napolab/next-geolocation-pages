@@ -10,15 +10,15 @@ export default async function Home() {
   const headersList = headers();
 
   const [staticTime, dynamicTime, revalidateTime] = await Promise.all([
-    nextFetch(
+    fetch(
       `https://timeapi.io/api/Time/current/zone?timeZone=Europe/Brussels`,
       { cache: "force-cache", next: { tags: ["force-cache", "all"] } }
     ).then((res) => res.json()),
-    nextFetch(
+    fetch(
       `https://timeapi.io/api/Time/current/zone?timeZone=Europe/Brussels`,
       { cache: "no-store", next: { tags: ["no-store", "all"] } }
     ).then((res) => res.json()),
-    nextFetch(
+    fetch(
       "https://timeapi.io/api/Time/current/zone?timeZone=Europe/Brussels",
       {
         next: {
