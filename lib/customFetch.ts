@@ -6,12 +6,17 @@
 import { StaticGenerationAsyncStorage } from "next/dist/client/components/static-generation-async-storage";
 import { DynamicServerError } from "next/dist/client/components/hooks-server-context";
 import { decode } from "./base64array-buffer";
-export { staticGenerationAsyncStorage } from 'next/dist/client/components/static-generation-async-storage'
+export { staticGenerationAsyncStorage } from "next/dist/client/components/static-generation-async-storage";
 
 const CACHE_ONE_YEAR = 31536000;
 
 // we're on cloudflare :D
 const isEdgeRuntime = true;
+
+// We get the AsyncStorage from the patched fetch :)
+//@ts-ignore
+/*   const staticGenerationStore = fetch.__nextGetStaticStore();
+  staticGenerationStore.incrementalCache = (globalThis as any).__incrementalCache; */
 
 function addImplicitTags(
   staticGenerationStore: ReturnType<StaticGenerationAsyncStorage["getStore"]>
@@ -87,11 +92,14 @@ export async function nextFetch(
   const fetchStart = Date.now();
   const method = init?.method?.toUpperCase() || "GET";
 
+  const originFetch: typeof fetch = (globalThis as any)._nextOriginalFetch
+
   // We get the AsyncStorage from the patched fetch :)
   //@ts-ignore
   const staticGenerationStore = fetch.__nextGetStaticStore();
-  staticGenerationStore.incrementalCache = (globalThis as any).__incrementalCache;
-
+  staticGenerationStore.incrementalCache = (
+    globalThis as any
+  ).__incrementalCache;
   const isRequestInput =
     input &&
     typeof input === "object" &&
@@ -313,12 +321,9 @@ export async function nextFetch(
       ...init,
       next: { ...init?.next, fetchType: "origin", fetchIdx },
     };
-    // Delete `cache` property as Cloudflare Workers will throw an error
-    if (isEdgeRuntime) {
-      delete clonedInit.cache;
-    }
+    delete clonedInit.cache
 
-    return fetch(input, clonedInit).then(async (res) => {
+    return originFetch(input, clonedInit).then(async (res) => {
       if (!isStale) {
         trackFetchMetric(staticGenerationStore, {
           start: fetchStart,
@@ -416,11 +421,7 @@ export async function nextFetch(
         const resData = entry.value.data;
         let decodedBody: ArrayBuffer;
 
-        if (process.env.NEXT_RUNTIME === "edge") {
-          decodedBody = decode(resData.body);
-        } else {
-          decodedBody = Buffer.from(resData.body, "base64").subarray();
-        }
+        decodedBody = decode(resData.body);
 
         trackFetchMetric(staticGenerationStore, {
           start: fetchStart,
@@ -494,5 +495,5 @@ export async function nextFetch(
     }
   }
 
-  return doOriginalFetch();
+  return await doOriginalFetch();
 }

@@ -9,22 +9,42 @@ export const runtime = "edge";
 export default async function Home() {
   const headersList = headers();
 
-  const [staticTime, dynamicTime, revalidateTime] = await Promise.all([
-    fetch(
-      `https://timeapi.io/api/Time/current/zone?timeZone=Europe/Brussels`,
+  const [staticTime, dynamicTime, revalidateTime10, revalidateTime30, revalidateTime60] = await Promise.all([
+    nextFetch(
+      `https://timeapi.io/api/Time/current/zone?timeZone=Europe/Amsterdam`,
       { cache: "force-cache", next: { tags: ["force-cache", "all"] } }
     ).then((res) => res.json()),
-    fetch(
-      `https://timeapi.io/api/Time/current/zone?timeZone=Europe/Brussels`,
+    nextFetch(
+      `https://timeapi.io/api/Time/current/zone?timeZone=Europe/Paris`,
       { cache: "no-store", next: { tags: ["no-store", "all"] } }
     ).then((res) => res.json()),
-    fetch(
+    nextFetch(
       "https://timeapi.io/api/Time/current/zone?timeZone=Europe/Brussels",
       {
         next: {
           // The data will be revalidated every 10 seconds
+          revalidate: 10,
+          tags: ["revalidate30", "revalidate", "all"],
+        },
+      }
+    ).then((res) => res.json()),
+    nextFetch(
+      "https://timeapi.io/api/Time/current/zone?timeZone=Europe/Brussels",
+      {
+        next: {
+          // The data will be revalidated every 30 seconds
           revalidate: 30,
-          tags: ["revalidate", "all"],
+          tags: ["revalidate10", "revalidate", "all"],
+        },
+      }
+    ).then((res) => res.json()),
+    nextFetch(
+      "https://timeapi.io/api/Time/current/zone?timeZone=Europe/Brussels",
+      {
+        next: {
+          // The data will be revalidated every 60 seconds
+          revalidate: 60,
+          tags: ["revalidate60", "revalidate", "all"],
         },
       }
     ).then((res) => res.json()),
@@ -61,9 +81,9 @@ export default async function Home() {
                 alt={`${country} flag`}
                 className="rounded-full"
                 src={`https://flagcdn.com/96x72/${country.toLowerCase()}.png`}
-                // src={`https://flagcdn.com/${country.toLowerCase()}.svg`}
                 width={32}
                 height={32}
+                unoptimized
               />
             </div>
             <div className="ml-4 mr-auto text-left">
@@ -117,19 +137,27 @@ export default async function Home() {
           </div>
           <div className="p-4 flex justify-center items-between border-b bg-gray-50">
             <h4 className="font-semibold text-left mr-auto">
-              Dynamic Time (revalidate 10sec)
+              Dynamic Time (revalidate 10sec - tags revalidate10 & revalidate)
             </h4>
             <div className="self-center">
-              <p className="text-gray-700">{revalidateTime.dateTime}</p>
+              <p className="text-gray-700">{revalidateTime10.dateTime}</p>
             </div>
           </div>
-          <div className="p-4 flexborder-b bg-gray-50 rounded-b-lg">
-            <h4 className="font-semibold text-left">Time Data raw response</h4>
-            <pre className="bg-black text-white font-mono text-left py-2 px-4 rounded-lg mt-4 text-sm leading-6">
-              <p className="whitespace-break-spaces break-words">
-                {JSON.stringify(revalidateTime)}
-              </p>
-            </pre>
+          <div className="p-4 flex justify-center items-between border-b bg-gray-50">
+            <h4 className="font-semibold text-left mr-auto">
+              Dynamic Time (revalidate 30sec - tags revalidate30 & revalidate)
+            </h4>
+            <div className="self-center">
+              <p className="text-gray-700">{revalidateTime30.dateTime}</p>
+            </div>
+          </div>
+          <div className="p-4 flex justify-center items-between border-b bg-gray-50">
+            <h4 className="font-semibold text-left mr-auto">
+              Dynamic Time (revalidate 60sec - tags revalidate60 & revalidate)
+            </h4>
+            <div className="self-center">
+              <p className="text-gray-700">{revalidateTime60.dateTime}</p>
+            </div>
           </div>
         </section>
       </main>
