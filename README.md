@@ -13,6 +13,8 @@ relatedTemplates:
   - edge-functions-i18n
 ---
 
+An extension of https://github.com/bluebeel/next-geolocation-pages
+
 # Geolocation
 
 This example shows how to use the `event.request.geo` object to determine a user's location.
