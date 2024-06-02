@@ -3,7 +3,9 @@ name = "next-geolocation"
 compatibility_date = "2024-06-01"
 compatibility_flags = [ "nodejs_compat" ]
 pages_build_output_dir = ".vercel/output/static"
+node_compat = true
 
 [env.production]
 compatibility_date = "2024-06-01"
 compatibility_flags = [ "nodejs_compat" ]
+node_compat = true
