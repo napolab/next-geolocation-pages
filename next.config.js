@@ -11,6 +11,6 @@ module.exports = {
         "localhost",
       ],
     },
-    incrementalCacheHandlerPath: require.resolve("./cache-handler.js"),
+    // incrementalCacheHandlerPath: require.resolve("./cache-handler.js"),
   },
 };
